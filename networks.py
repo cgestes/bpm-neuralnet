@@ -60,26 +60,32 @@ print("ici", X.shape, y.shape)
 
 # In[5]:
 
-Number_Repete = 1
+#Number_Repete = 1
 Number_Sample = len(X[1,:])
-Number_Sample_Boucle = int(Number_Sample/Number_Repete)
+#Number_Sample_Boucle = int(Number_Sample/Number_Repete)
 
-Number_Exemple = len(y)
+Number_Example = len(y)
 
-print("Nb sample", Number_Repete, Number_Sample, Number_Sample_Boucle)
+#print("Nb sample", Number_Repete, Number_Sample, Number_Sample_Boucle)
 
 # In[5]:
 
 np.random.seed(1)
 
+# Calculate forward through the network.
+LO = np.ones([Number_Example, 1]) #rajout du bias
+X = np.append(X, LO, axis=1)
 
+print (X.shape)
+
+print ("Exp:", y)
 # Now we intialize the weights to random values. syn0 are the weights between the input layer and the hidden layer.  It is a 3x4 matrix because there are two input weights plus a bias term (=3) and four nodes in the hidden layer (=4). syn1 are the weights between the hidden layer and the output layer. It is a 4x1 matrix because there are 4 nodes in the hidden layer and one output. Note that there is no bias term feeding the output layer in this example. The weights are initially generated randomly because optimization tends not to work well when all the weights start at the same value. Note that neither of the neural networks shown in the video describe the example.
 
 # In[6]:
 
 #synapses
-syn0 = 2*np.random.random((Number_Sample_Boucle+1,Number_Exemple)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
-syn1 = 2*np.random.random((Number_Exemple,1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn0 = 2*np.random.random((Number_Sample+1, Number_Example)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
+syn1 = 2*np.random.random((Number_Example,1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
 
 
 # This is the main training loop. The output shows the evolution of the error between the model and desired. The error steadily decreases.
@@ -88,32 +94,27 @@ syn1 = 2*np.random.random((Number_Exemple,1)) - 1  # 100x1 matrix of weights. (4
 
 #training step
 for j in range(0,60000):
-    for i in range(0,Number_Repete):
-        # Calculate forward through the network.
-        LO = np.ones([Number_Exemple,1]) #rajout du bias
-        l0 = np.append(X[:,Number_Sample_Boucle*i:Number_Sample_Boucle*(i+1)],LO,axis=1)
-        l1 = nonlin(np.dot(l0, syn0))
-        l2 = nonlin(np.dot(l1, syn1))
 
-        # Back propagation of errors using the chain rule.
-        l2_error = y - l2
-        #print ("Error: " + str(np.mean(np.abs(l2_error))))
-        if (Number_Repete == 1):
-            if ((j % 10000) == 0):   # Only print the error every 10000 steps, to save time and limit the amount of output.
-                print ("Error: " + str(np.mean(np.abs(l2_error))))
-        else:
-            if ((j % 10000) == 0 and (i % Number_Repete-1) == 0):   # Only print the error every 10000 steps, to save time and limit the amount of output.
-                print ("Error: " + str(np.mean(np.abs(l2_error))))
+    l0 = X
+    l1 = nonlin(np.dot(l0, syn0))
+    l2 = nonlin(np.dot(l1, syn1))
 
-        l2_delta = l2_error*nonlin(l2, deriv=True)
+    # Back propagation of errors using the chain rule.
+    l2_error = y - l2
+    #print ("Error: " + str(np.mean(np.abs(l2_error))))
+    if ((j % 100) == 0):   # Only print the error every 10000 steps, to save time and limit the amount of output.
+        print ("Error: " + str(np.mean(np.abs(l2_error))))
+        print ("res:", l2)
 
-        l1_error = l2_delta.dot(syn1.T)
+    l2_delta = l2_error*nonlin(l2, deriv=True)
 
-        l1_delta = l1_error * nonlin(l1,deriv=True)
+    l1_error = l2_delta.dot(syn1.T)
 
-        #update weights (no learning rate term)
-        syn1 += l1.T.dot(l2_delta)
-        syn0 += l0.T.dot(l1_delta)
+    l1_delta = l1_error * nonlin(l1,deriv=True)
+
+    #update weights (no learning rate term)
+    syn1 += l1.T.dot(l2_delta)
+    syn0 += l0.T.dot(l1_delta)
 
 print ("Output after training")
 print (l2)

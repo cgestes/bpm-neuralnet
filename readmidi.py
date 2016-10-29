@@ -43,7 +43,7 @@ def tickToUs(mpqn, resolution, tick):
 #1000 val / 10sec
 #100val / sec
 def UsToReso(us):
-  return int(us / 1000 / 10)
+  return int(us / 1000 / 100)
 
 #0-127 -> 0 -> 1
 def pitchToFloat(pitch):
@@ -60,7 +60,7 @@ def decodeFile(filename):
   #print pattern
 
   #1000
-  result = [0] * 1000
+  result = [0] * 100
 
   for track in pattern:
     for n in track:
@@ -73,7 +73,7 @@ def decodeFile(filename):
           continue #note off
         us = tickToUs(mpqn, pattern.resolution, n.tick)
         r = UsToReso(us)
-        if r >= 1000:
+        if r >= 100:
           continue
         #print "Note:", us, " t:", n.pitch, "r:", r
         result[r] = pitchToFloat(n.pitch)

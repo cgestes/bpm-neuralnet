@@ -10,13 +10,18 @@ def importFile(f):
     dataset = pickle.load(inf)
     return dataset
 
-if __name__ == "__main__":
-  d = importFile(sys.argv[1])
+def readData(f):
+  d = importFile(f)
   IN = []
   OUT = []
   for data in d:
     IN.append(data["data"])
     OUT.append(data["bpm"])
-  print np.array(IN)
-  print np.array(OUT)
+  return (np.array(IN), np.array([OUT]).transpose())
+
+if __name__ == "__main__":
+  a = readData(sys.argv[1])
+  print(a)
+  #print(IN)
+  #print(OUT)
   #print(d)

@@ -31,10 +31,13 @@ def nonlin(x, deriv=False):  # Note: there is a typo on this line in the video
 #input data
 #1000 sample + 1 bias * 100 example
 
-X = np.array([[0,0],  # Note: there is a typo on this line in the video
-            [0,1],
-            [1,0],
-            [1,1]])
+X = np.array([[0,0,0,0,0,0],  # Note: there is a typo on this line in the video
+            [1,1,1,1,1,1],
+            [1,0,1,0,1,0],
+            [1,0,0,1,0,0],
+            [1,1,0,1,1,0],
+            [1,0,1,1,0,1],
+            [0,0,1,0,0,1]])
 
 
 # The output of the exclusive OR function follows.
@@ -46,8 +49,11 @@ X = np.array([[0,0],  # Note: there is a typo on this line in the video
 
 y = np.array([[0],
              [1],
-             [1],
-             [0]])
+             [0.5],
+             [0.33],
+             [0.66],
+             [0.66],
+             [0.33]])
 
 
 print("ici")
@@ -65,6 +71,8 @@ Number_Sample = len(X[1,:])
 #Number_Sample_Boucle = int(Number_Sample/Number_Repete)
 
 Number_Example = len(y)
+
+Number_Neurones = 2
 
 #print("Nb sample", Number_Repete, Number_Sample, Number_Sample_Boucle)
 
@@ -84,8 +92,10 @@ print ("Exp:", y)
 # In[6]:
 
 #synapses
-syn0 = 2*np.random.random((Number_Sample+1, Number_Example)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
-syn1 = 2*np.random.random((Number_Example,1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn0 = 2*np.random.random((Number_Sample+1,Number_Neurones)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
+syn1 = 2*np.random.random((Number_Neurones,2*Number_Neurones)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn2 = 2*np.random.random((2*Number_Neurones,Number_Neurones)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn3 = 2*np.random.random((Number_Neurones,1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
 
 
 # This is the main training loop. The output shows the evolution of the error between the model and desired. The error steadily decreases.
@@ -98,27 +108,38 @@ for j in range(0,60000):
     l0 = X
     l1 = nonlin(np.dot(l0, syn0))
     l2 = nonlin(np.dot(l1, syn1))
+    l3 = nonlin(np.dot(l2, syn2))
+    l4 = nonlin(np.dot(l3, syn3))
 
     # Back propagation of errors using the chain rule.
-    l2_error = y - l2
+    l4_error = y - l4
     #print ("Error: " + str(np.mean(np.abs(l2_error))))
-    if ((j % 100) == 0):   # Only print the error every 10000 steps, to save time and limit the amount of output.
-        print ("Error: " + str(np.mean(np.abs(l2_error))))
-        print ("res:", l2)
+    if ((j % 10000) == 0):   # Only print the error every 10000 steps, to save time and limit the amount of output.
+        print ("Error: " + str(np.mean(np.abs(l4_error))))
+        #print ("res:", l2)
+    
+    l4_delta = l4_error*nonlin(l4, deriv=True)
 
-    l2_delta = l2_error*nonlin(l2, deriv=True)
+    l3_error = l4_delta.dot(syn3.T)
+    
+    l3_delta = l3_error*nonlin(l3, deriv=True)
+
+    l2_error = l3_delta.dot(syn2.T)
+
+    l2_delta = l2_error * nonlin(l2,deriv=True)
 
     l1_error = l2_delta.dot(syn1.T)
 
     l1_delta = l1_error * nonlin(l1,deriv=True)
 
     #update weights (no learning rate term)
+    syn3 += l3.T.dot(l4_delta)
+    syn2 += l2.T.dot(l3_delta)
     syn1 += l1.T.dot(l2_delta)
     syn0 += l0.T.dot(l1_delta)
 
 print ("Output after training")
-print (l2)
-
+#print (l4)
 
 
 

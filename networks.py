@@ -72,7 +72,7 @@ Number_Sample = len(X[1,:])
 
 Number_Example = len(y)
 
-Number_Neurones = 2
+Number_Neurons = 2
 
 #print("Nb sample", Number_Repete, Number_Sample, Number_Sample_Boucle)
 
@@ -91,11 +91,11 @@ print ("Exp:", y)
 
 # In[6]:
 
-#synapses
-syn0 = 2*np.random.random((Number_Sample+1,Number_Neurones)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
-syn1 = 2*np.random.random((Number_Neurones,2*Number_Neurones)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
-syn2 = 2*np.random.random((2*Number_Neurones,Number_Neurones)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
-syn3 = 2*np.random.random((Number_Neurones,1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn0 = 2*np.random.random((Number_Sample+1,Number_Neurons)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
+syn1 = 2*np.random.random((Number_Neurons,2*Number_Neurons)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn2 = 2*np.random.random((2*Number_Neurons,Number_Neurons)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn3 = 2*np.random.random((Number_Neurons,1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+
 
 
 # This is the main training loop. The output shows the evolution of the error between the model and desired. The error steadily decreases.
@@ -115,9 +115,9 @@ for j in range(0,60000):
     l4_error = y - l4
     #print ("Error: " + str(np.mean(np.abs(l2_error))))
     if ((j % 10000) == 0):   # Only print the error every 10000 steps, to save time and limit the amount of output.
+        print ("res:", l4[:10])
         print ("Error: " + str(np.mean(np.abs(l4_error))))
-        #print ("res:", l2)
-    
+            
     l4_delta = l4_error*nonlin(l4, deriv=True)
 
     l3_error = l4_delta.dot(syn3.T)

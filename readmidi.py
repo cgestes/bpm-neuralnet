@@ -23,6 +23,21 @@ def getMPQN(pattern):
         return n.get_mpqn()
   raise Exception("No bpm found");
 
+np.random.seed(1)
+
+def randomBPM(a, b):
+  coef = np.random.random(1)[0] * 1.7 + 0.3
+  return a*coef, b*coef
+
+def getMPQN_BPM(pattern):
+  for track in pattern:
+    for n in track:
+      if n.metacommand == 0x51:
+        print "bpm:", n.get_bpm(), " mpqn:", n.get_mpqn()
+        return randomBPM(n.get_mpqn(), n.get_bpm())
+  raise Exception("No bpm found");
+
+
 #microseconds per quarter-note
 #beats per minute
 #MICROSECONDS_PER_MINUTE = 60000000
@@ -43,7 +58,7 @@ def tickToUs(mpqn, resolution, tick):
 #1000 val / 10sec
 #100val / sec
 def UsToReso(us):
-  return int(us / 1000 / 100)
+  return int(us / 1000 / 10)
 
 #0-127 -> 0 -> 1
 def pitchToFloat(pitch):
@@ -54,15 +69,16 @@ def decodeFile(filename):
   pattern = midi.read_midifile(filename)
   pattern.make_ticks_abs()
   discarded = 0
-  mpqn = getMPQN(pattern)
-  bpm = getBpm(pattern)
-  print "resolution:", pattern.resolution
+  mpqn, bpm = getMPQN_BPM(pattern)
+  #bpm = getBpm(pattern)
+  print "BPM:", bpm
   #print pattern
 
   #1000
-  result = [0] * 100
+  result = [0] * 1000
 
   for track in pattern:
+    #tracks = track.sort()
     for n in track:
       #print n
       if n.is_event(0x90): #NOTEON_EV
@@ -73,7 +89,7 @@ def decodeFile(filename):
           continue #note off
         us = tickToUs(mpqn, pattern.resolution, n.tick)
         r = UsToReso(us)
-        if r >= 100:
+        if r >= 1000:
           continue
         #print "Note:", us, " t:", n.pitch, "r:", r
         result[r] = pitchToFloat(n.pitch)
@@ -88,12 +104,16 @@ def walkFiles(dir):
   for dirpath, dnames, fnames in os.walk(dir):
     for f in fnames:
       if f.endswith(".mid"):
-        r = decodeFile(os.path.join(dirpath, f))
-        dataset.append(r)
-  with open('data.pkl', 'wb') as out:
-    pickle.dump(dataset, out, 2)
+        for i in range(5):
+          r = decodeFile(os.path.join(dirpath, f))
+          dataset.append(r)
+  return dataset
+
+
 
   #print dataset
 if __name__ == "__main__":
   f = sys.argv[1]
-  walkFiles(f);
+  d = walkFiles(f)
+  with open('data.pkl', 'wb') as out:
+    pickle.dump(d, out, 2)

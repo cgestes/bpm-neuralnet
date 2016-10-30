@@ -83,9 +83,11 @@ print ("Exp:", y)
 
 # In[6]:
 
+Number_Neurons = 40
+
 #synapses
-syn0 = 2*np.random.random((Number_Sample+1, Number_Example)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
-syn1 = 2*np.random.random((Number_Example,1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
+syn0 = 2*np.random.random((Number_Sample+1, Number_Neurons)) - 1  # 21x100 matrix of weights ((20 inputs + 1 bias) x 100 nodes in the hidden layer)
+syn1 = 2*np.random.random((Number_Neurons, 1)) - 1  # 100x1 matrix of weights. (4 nodes x 1 output) - no bias term in the hidden layer.
 
 
 # This is the main training loop. The output shows the evolution of the error between the model and desired. The error steadily decreases.
@@ -103,8 +105,8 @@ for j in range(0,60000):
     l2_error = y - l2
     #print ("Error: " + str(np.mean(np.abs(l2_error))))
     if ((j % 100) == 0):   # Only print the error every 10000 steps, to save time and limit the amount of output.
+        print ("res:", l2[:10])
         print ("Error: " + str(np.mean(np.abs(l2_error))))
-        print ("res:", l2)
 
     l2_delta = l2_error*nonlin(l2, deriv=True)
 
